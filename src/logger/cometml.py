@@ -16,7 +16,7 @@ class CometMLWriter:
         logger,
         project_config,
         project_name,
-        apikey_path="cometmlapikey.txt",
+        api_key,
         workspace=None,
         run_id=None,
         run_name=None,
@@ -44,9 +44,8 @@ class CometMLWriter:
             # file = open(apikey_path, "r")
             # api_key = file.read()
             # file.close()
-            # api_key = input("CometML API key: ")
 
-            comet_ml.login()
+            comet_ml.login(api_key)
             self.run_id = run_id
 
             resume = False
