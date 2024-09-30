@@ -41,9 +41,11 @@ class CometMLWriter:
         try:
             import comet_ml
 
-            file = open(apikey_path, "r")
-            api_key = file.read()
-            file.close()
+            # file = open(apikey_path, "r")
+            # api_key = file.read()
+            # file.close()
+
+            api_key = input()
 
             comet_ml.login(api_key)
             self.run_id = run_id
