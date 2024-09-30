@@ -44,10 +44,9 @@ class CometMLWriter:
             # file = open(apikey_path, "r")
             # api_key = file.read()
             # file.close()
+            # api_key = input("CometML API key: ")
 
-            api_key = input("CometML API key: ")
-
-            comet_ml.login(api_key)
+            comet_ml.login()
             self.run_id = run_id
 
             resume = False
