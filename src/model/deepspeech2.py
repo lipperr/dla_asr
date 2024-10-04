@@ -244,6 +244,7 @@ class DeepSpeech2(nn.Module):
             output (dict): output dict containing log_probs and
                 transformed lengths.
         """
+        print("IN FORWARD")
         spectrogram_length = batch["spectrogram_length"]
         outputs, output_lengths = self.conv(spectrogram, spectrogram_length)
 
@@ -253,8 +254,7 @@ class DeepSpeech2(nn.Module):
             outputs = gru_layer(outputs, output_lengths)
 
         log_probs = nn.functional.log_softmax(self.fc(outputs.transpose(0, 1)), dim=-1)
-        log_probs_length = self.transform_input_lengths(spectrogram_length)
-        return {"log_probs": log_probs, "log_probs_length": log_probs_length}
+        return {"log_probs": log_probs, "log_probs_length": spectrogram_length}
 
     def transform_input_lengths(self, input_lengths):
         """
