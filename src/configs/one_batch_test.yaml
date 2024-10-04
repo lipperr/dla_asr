@@ -1,5 +1,5 @@
 defaults:
-  - model: deepspeech2
+  - model: deepspeech2_1btest
   - writer: cometml
   - metrics: example
   - datasets: onebatchtest
@@ -21,7 +21,7 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
 trainer:
-  log_step: 1
+  log_step: 50
   n_epochs: 5
   epoch_len: 10
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)

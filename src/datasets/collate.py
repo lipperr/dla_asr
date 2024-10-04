@@ -30,5 +30,5 @@ def collate_fn(dataset_items: list[dict]):
         else:
             batch[key] = [item[key] for item in dataset_items]
     batch["spectrogram"] = batch["spectrogram"].permute(0, 2, 1)
-
+    print("RETURNED BATCH")
     return batch
