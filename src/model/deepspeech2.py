@@ -203,7 +203,7 @@ class DeepSpeech2(nn.Module):
     def __init__(
         self,
         n_features: int,
-        n_class: int,
+        n_tokens: int,
         conv_dim: int = 2,
         n_conv_layers: int = 2,
         n_rnn_layers: int = 5,
@@ -230,7 +230,7 @@ class DeepSpeech2(nn.Module):
 
         self.fc = Sequential(
             nn.LayerNorm(rnn_output_size),
-            nn.Linear(rnn_output_size, n_class, bias=False),
+            nn.Linear(rnn_output_size, n_tokens, bias=False),
         )
 
     def forward(self, spectrogram, **batch):
