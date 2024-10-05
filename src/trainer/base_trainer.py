@@ -220,6 +220,7 @@ class BaseTrainer:
                     continue
                 else:
                     raise e
+
             self.train_metrics.update("grad_norm", self._get_grad_norm())
 
             # log current results
