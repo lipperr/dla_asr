@@ -181,7 +181,11 @@ class DeepSpeech2(nn.Module):
         for gru_layer in self.gru_layers:
             outputs, output_lengths = gru_layer(outputs, output_lengths)
 
-        outputs = self.batch_norm(outputs.transpose(1, 2)).transpose(1, 2)
+        outputs = (
+            self.batch_norm(outputs.transpose(1, 2).contiguous())
+            .transpose(1, 2)
+            .contiguous()
+        )
         log_probs = nn.functional.log_softmax(self.fc(outputs), dim=-1)
         return {"log_probs": log_probs, "log_probs_length": output_lengths}
 
