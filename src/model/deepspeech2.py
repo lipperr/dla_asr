@@ -26,7 +26,7 @@ class GRUBlock(nn.Module):
         )
 
     def forward(self, x, x_length):
-        x = self.batch_norm(x.transpose(1, 2)).transpose(1, 2).contiguous()
+        x = self.batch_norm(x.transpose(1, 2)).transpose(1, 2)
         x = nn.utils.rnn.pack_padded_sequence(
             x, x_length, batch_first=True, enforce_sorted=False
         )
@@ -180,7 +180,7 @@ class DeepSpeech2(nn.Module):
         for gru_layer in self.gru_layers:
             outputs, output_lengths = gru_layer(outputs, output_lengths)
 
-        outputs = self.batch_norm(outputs.transpose(1, 2)).transpose(1, 2).contiguous()
+        outputs = self.batch_norm(outputs.transpose(1, 2)).transpose(1, 2)
 
         log_probs = nn.functional.log_softmax(self.fc(outputs), dim=-1)
         return {"log_probs": log_probs, "log_probs_length": output_lengths}
