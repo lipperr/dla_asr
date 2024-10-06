@@ -2,6 +2,25 @@ import torch
 from torch import nn
 
 
+class BatchNormT(nn.Module):
+    def __init__(
+        self,
+        num_features,
+        eps=1e-05,
+        momentum=0.1,
+        affine=True,
+        track_running_stats=True,
+        device=None,
+        dtype=None,
+    ):
+        super().__init__()
+        self.bn = nn.BatchNorm1d(num_features)
+
+    def forward(self, x, x_length):
+        x = self.bn(x.transpose(1, 2))
+        return x.transpose(1, 2), x_length
+
+
 class ConvBlock(nn.Module):
     def __init__(self, n_conv_layers: int = 2, n_features: int = 128):
         super().__init__()
@@ -76,7 +95,6 @@ class GRUBlock(nn.Module):
     ):
         super().__init__()
 
-        self.batch_norm = nn.BatchNorm1d(input_size)
         self.gru = nn.GRU(
             input_size=input_size,
             hidden_size=hidden_size,
@@ -88,7 +106,6 @@ class GRUBlock(nn.Module):
         )
 
     def forward(self, x, x_length):
-        x = self.batch_norm(x.transpose(1, 2)).transpose(1, 2)
         x = nn.utils.rnn.pack_padded_sequence(
             x, x_length, batch_first=True, enforce_sorted=False
         )
@@ -126,10 +143,13 @@ class DeepSpeech2(nn.Module):
         ]
 
         for _ in range(n_rnn_layers - 1):
-            self.gru_layers.append(
-                GRUBlock(input_size=rnn_output_size, hidden_size=rnn_output_size)
+            self.gru_layers.extend(
+                [
+                    BatchNormT(rnn_output_size),
+                    GRUBlock(input_size=rnn_output_size, hidden_size=rnn_output_size),
+                ]
             )
-
+        self.gru_layers = nn.Sequential(*self.gru_layers)
         self.batch_norm = nn.BatchNorm1d(rnn_output_size)
         self.fc = nn.Linear(rnn_output_size, n_tokens, bias=False)
 
