@@ -1,8 +1,70 @@
+import torch
 from torch import nn
-from torch.nn import Sequential
+
+
+class ConvBlock(nn.Module):
+    def __init__(self, n_conv_layers: int = 2, n_features: int = 128):
+        super().__init__()
+        assert n_conv_layers in [1, 2, 3]
+        self.scaling = 2
+        self.out_features = 0
+        self.conv_block = [
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=32,
+                kernel_size=(41, 11),
+                stride=(2, 2),
+                padding=(20, 5),
+            ),
+            nn.BatchNorm2d(32),
+            nn.Hardtanh(0, 20, inplace=True),
+        ]
+
+        self.out_features = (n_features + 20 * 2 - 41) // 2 + 1
+
+        if n_conv_layers == 2:
+            self.conv_block.extend(
+                [
+                    nn.Conv2d(
+                        in_channels=32,
+                        out_channels=32,
+                        kernel_size=(21, 11),
+                        stride=(2, 1),
+                        padding=(10, 5),
+                    ),
+                    nn.BatchNorm2d(32),
+                    nn.Hardtanh(0, 20, inplace=True),
+                ]
+            )
+            self.out_features = (self.out_features + 10 * 2 - 21) // 2 + 1
+
+        if n_conv_layers == 3:
+            self.conv_block.extend(
+                [
+                    nn.Conv2d(
+                        in_channels=32,
+                        out_channels=96,
+                        kernel_size=(21, 11),
+                        stride=(2, 1),
+                        padding=(10, 5),
+                    ),
+                    nn.BatchNorm2d(96),
+                    nn.Hardtanh(0, 20, inplace=True),
+                ]
+            )
+            self.out_features = (self.out_features + 20 * 2 - 41) // 2 + 1
+        self.conv_block = nn.Sequential(*self.conv_block)
+
+    def forward(self, x, x_length):
+        x = self.conv_block(x)
+        return x, x_length // self.scaling
 
 
 class GRUBlock(nn.Module):
+    """
+    Class for RNN layer.
+    """
+
     def __init__(
         self,
         input_size,
@@ -15,7 +77,7 @@ class GRUBlock(nn.Module):
         super().__init__()
 
         self.batch_norm = nn.BatchNorm1d(input_size)
-        self.gru_layer = nn.GRU(
+        self.gru = nn.GRU(
             input_size=input_size,
             hidden_size=hidden_size,
             num_layers=1,
@@ -30,98 +92,11 @@ class GRUBlock(nn.Module):
         x = nn.utils.rnn.pack_padded_sequence(
             x, x_length, batch_first=True, enforce_sorted=False
         )
-        x, _ = self.gru_layer(x, None)
+        x, _ = self.gru(x, None)
         x, _ = nn.utils.rnn.pad_packed_sequence(x, batch_first=True)
-        if self.gru_layer.bidirectional:
-            x = (
-                x[..., : self.gru_layer.hidden_size]
-                + x[..., self.gru_layer.hidden_size :]
-            )
+        if self.gru.bidirectional:
+            x = x[..., : self.gru.hidden_size] + x[..., self.gru.hidden_size :]
         return x, x_length
-
-
-class ConvBlock(nn.Module):
-    def __init__(self, n_conv_layers: int = 2, n_features: int = 128):
-        super().__init__()
-        assert n_conv_layers in [1, 2, 3]
-        self.scaling = 2
-        self.out_features = 0
-
-        if n_conv_layers == 1:
-            self.conv_block = nn.Sequential(
-                nn.Conv2d(
-                    in_channels=1,
-                    out_channels=32,
-                    kernel_size=(41, 11),
-                    stride=(2, 2),
-                    padding=(20, 5),
-                ),
-                nn.BatchNorm2d(32),
-                nn.Hardtanh(0, 20, inplace=True),
-            )
-            self.out_features = (n_features + 20 * 2 - 41) // 2 + 1
-
-        elif n_conv_layers == 2:
-            self.conv_block = nn.Sequential(
-                nn.Conv2d(
-                    in_channels=1,
-                    out_channels=32,
-                    kernel_size=(41, 11),
-                    stride=(2, 2),
-                    padding=(20, 5),
-                ),
-                nn.BatchNorm2d(32),
-                nn.Hardtanh(0, 20, inplace=True),
-                nn.Conv2d(
-                    in_channels=32,
-                    out_channels=32,
-                    kernel_size=(21, 11),
-                    stride=(2, 1),
-                    padding=(10, 5),
-                ),
-                nn.BatchNorm2d(32),
-                nn.Hardtanh(0, 20, inplace=True),
-            )
-            self.out_features = (n_features + 20 * 2 - 41) // 2 + 1
-            self.out_features = (self.out_features + 10 * 2 - 21) // 2 + 1
-
-        else:
-            self.conv_block = nn.Sequential(
-                nn.Conv2d(
-                    in_channels=1,
-                    out_channels=32,
-                    kernel_size=(41, 11),
-                    stride=(2, 2),
-                    padding=(20, 5),
-                ),
-                nn.BatchNorm2d(32),
-                nn.Hardtanh(0, 20, inplace=True),
-                nn.Conv2d(
-                    in_channels=32,
-                    out_channels=32,
-                    kernel_size=(21, 11),
-                    stride=(2, 1),
-                    padding=(10, 5),
-                ),
-                nn.BatchNorm2d(32),
-                nn.Hardtanh(0, 20, inplace=True),
-                nn.Conv2d(
-                    in_channels=32,
-                    out_channels=96,
-                    kernel_size=(21, 11),
-                    stride=(2, 1),
-                    padding=(10, 5),
-                ),
-                nn.BatchNorm2d(96),
-                nn.Hardtanh(0, 20, inplace=True),
-            )
-            self.out_features = (n_features + 10 * 2 - 21) // 2 + 1
-            self.out_features = (self.out_features + 10 * 2 - 21) // 2 + 1
-            self.out_features = (self.out_features + 20 * 2 - 41) // 2 + 1
-
-    def forward(self, x, x_length):
-        x = self.conv_block(x)
-        return x, x_length // self.scaling
 
 
 class DeepSpeech2(nn.Module):
