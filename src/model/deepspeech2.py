@@ -176,16 +176,13 @@ class DeepSpeech2(nn.Module):
         outputs, output_lengths = self.conv_block(spectrogram, spectrogram_length)
 
         B, C, F, T = outputs.shape
-        outputs = outputs.view(B, C * F, T).transpose(1, 2).contiguous()
+        outputs = outputs.view(B, C * F, T).transpose(1, 2)
 
         for gru_layer in self.gru_layers:
             outputs, output_lengths = gru_layer(outputs, output_lengths)
 
-        outputs = (
-            self.batch_norm(outputs.transpose(1, 2).contiguous())
-            .transpose(1, 2)
-            .contiguous()
-        )
+        outputs = self.batch_norm(outputs.view(0, 2, 1)).view(0, 1, 2)
+
         log_probs = nn.functional.log_softmax(self.fc(outputs), dim=-1)
         return {"log_probs": log_probs, "log_probs_length": output_lengths}
 
