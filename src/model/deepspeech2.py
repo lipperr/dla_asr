@@ -142,10 +142,9 @@ class DeepSpeech2(nn.Module):
 
         self.conv_block = ConvBlock(n_conv_layers=n_conv_layers, n_features=n_features)
 
-        # rnn_input_size = self.conv_block.out_features
-        rnn_input_size = (
-            (96 if n_conv_layers == 3 else 32) * n_features // 2**n_conv_layers
-        )
+        rnn_input_size = n_features // 2**n_conv_layers
+        rnn_input_size *= 32 if n_conv_layers < 3 else 96
+
         rnn_output_size = fc_hidden * 2  # bidirectional
         self.gru_layers = [
             GRUBlock(input_size=rnn_input_size, hidden_size=rnn_output_size)
@@ -181,7 +180,7 @@ class DeepSpeech2(nn.Module):
         for gru_layer in self.gru_layers:
             outputs, output_lengths = gru_layer(outputs, output_lengths)
 
-        outputs = self.batch_norm(outputs.view(0, 2, 1)).view(0, 1, 2)
+        outputs = self.batch_norm(outputs.transpose(1, 2)).transpose(1, 2).contiguous()
 
         log_probs = nn.functional.log_softmax(self.fc(outputs), dim=-1)
         return {"log_probs": log_probs, "log_probs_length": output_lengths}
