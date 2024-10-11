@@ -147,7 +147,7 @@ class Trainer(BaseTrainer):
 
         if "CER_(BeamSearch-custom)" in metrics_to_log:
             bs_preds = [
-                self.text_encoder.ctc_beamsearch(prob, type="bs")[0]["hypothesis"]
+                self.text_encoder.ctc_beamsearch(prob, type="custom")[0]["hypothesis"]
                 for prob in probs_cut[:examples_to_log]
             ]
             rows["BS_custom_predictions"] = bs_preds
