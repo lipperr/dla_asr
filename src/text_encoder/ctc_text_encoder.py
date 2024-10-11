@@ -104,7 +104,7 @@ class CTCTextEncoder:
         elif type == "nolm":
             return [
                 {
-                    "hypothesis": self.decoder_no_lm.decode(probs, beam_size),
+                    "hypothesis": self.decoder.decode(probs, beam_size),
                     "probability": 1.0,
                 }
             ]

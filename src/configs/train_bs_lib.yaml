@@ -21,7 +21,6 @@ loss_function:
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
   vocab_type: "libri"
-  lm_path: None
   use_bpe: False
 trainer:
   log_step: 20
