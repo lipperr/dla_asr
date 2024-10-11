@@ -19,7 +19,7 @@ class CTCTextEncoder:
                 set to ascii
         """
 
-        if vocab_type is None:
+        if vocab_type is None or vocab_type == "":
             alphabet = list(ascii_lowercase + " ")
         else:
             vocab_path = download_vocab(vocab_type)
