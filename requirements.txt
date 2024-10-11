@@ -12,6 +12,8 @@ comet_ml
 hydra-core
 wget
 editdistance
+kenlm
+pyctcdecode
 
 black
 isort

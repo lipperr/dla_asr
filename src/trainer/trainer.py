@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.logger.utils import plot_spectrogram
@@ -57,8 +58,11 @@ class Trainer(BaseTrainer):
         for loss_name in self.config.writer.loss_names:
             metrics.update(loss_name, batch[loss_name].item())
 
+        print(self.is_train, "self.is_train")
+        print(metric_funcs)
         for met in metric_funcs:
             metrics.update(met.name, met(**batch))
+            print("updated metrics")
         return batch
 
     def _log_batch(self, batch_idx, batch, mode="train"):
@@ -79,9 +83,11 @@ class Trainer(BaseTrainer):
         # logging scheme might be different for different partitions
         if mode == "train":  # the method is called only every self.log_step steps
             self.log_spectrogram(**batch)
+            self.log_audio(**batch)
         else:
             # Log Stuff
             self.log_spectrogram(**batch)
+            self.log_audio(**batch)
             self.log_predictions(**batch)
 
     def log_spectrogram(self, spectrogram, **batch):
@@ -89,35 +95,106 @@ class Trainer(BaseTrainer):
         image = plot_spectrogram(spectrogram_for_plot)
         self.writer.add_image("spectrogram", image)
 
+    def log_audio(self, audio, **batch):
+        self.writer.add_audio("audio", audio[0], 16000)
+
     def log_predictions(
         self, text, log_probs, log_probs_length, audio_path, examples_to_log=10, **batch
     ):
-        # TODO add beam search
-        # Note: by improving text encoder and metrics design
-        # this logging can also be improved significantly
-
-        argmax_inds = log_probs.cpu().argmax(-1).numpy()
-        argmax_inds = [
-            inds[: int(ind_len)]
-            for inds, ind_len in zip(argmax_inds, log_probs_length.numpy())
-        ]
-        argmax_texts_raw = [self.text_encoder.decode(inds) for inds in argmax_inds]
-        argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
-        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
+        metrics_to_log = self.evaluation_metrics.keys()
 
         rows = {}
-        for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
-            target = self.text_encoder.normalize_text(target)
-            wer = calc_wer(target, pred) * 100
-            cer = calc_cer(target, pred) * 100
+        rows["Target"] = [
+            self.text_encoder.normalize_text(target)
+            for target in text[:examples_to_log]
+        ]
 
-            rows[Path(audio_path).name] = {
-                "target": target,
-                "raw prediction": raw_pred,
-                "predictions": pred,
-                "wer": wer,
-                "cer": cer,
-            }
-        self.writer.add_table(
-            "predictions", pd.DataFrame.from_dict(rows, orient="index")
-        )
+        probs_cut = [
+            prob[:length] for prob, length in zip(log_probs, log_probs_length.numpy())
+        ]
+        if "CER_(LM-BeamSearch)" in metrics_to_log:
+            bs_lm_preds = [
+                self.text_encoder.ctc_beamsearch(prob, type="lm")[0]["hypothesis"]
+                for prob in probs_cut[:examples_to_log]
+            ]
+            rows["BS_LM_predictions"] = bs_lm_preds
+            metrics = np.array(
+                [
+                    np.array(
+                        [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
+                    )
+                    for target, pred in zip(rows["Target"].values, bs_lm_preds)
+                ]
+            )
+
+            rows["BS_LM_CER"] = metrics[:, 0]
+            rows["BS_LM_WER"] = metrics[:, 1]
+
+        if "CER_(BeamSearch)" in metrics_to_log:
+            bs_nolm_preds = [
+                self.text_encoder.ctc_beamsearch(prob, type="nolm")[0]["hypothesis"]
+                for prob in probs_cut[:examples_to_log]
+            ]
+            rows["BS_predictions"] = bs_nolm_preds
+
+            metrics = np.array(
+                [
+                    np.array(
+                        [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
+                    )
+                    for target, pred in zip(rows["Target"].values, bs_nolm_preds)
+                ]
+            )
+            rows["BS_CER"] = metrics[:, 0]
+            rows["BS_WER"] = metrics[:, 1]
+
+        if "CER_(BeamSearch-custom)" in metrics_to_log:
+            bs_preds = [
+                self.text_encoder.ctc_beamsearch(prob, type="bs")[0]["hypothesis"]
+                for prob in probs_cut[:examples_to_log]
+            ]
+            rows["BS_custom_predictions"](bs_preds)
+
+            metrics = np.array(
+                [
+                    np.array(
+                        [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
+                    )
+                    for target, pred in zip(rows["Target"].values, bs_preds)
+                ]
+            )
+            rows["BS_CER"] = metrics[:, 0]
+            rows["BS_WER"] = metrics[:, 1]
+
+        if "CER_(Argmax)" in metrics_to_log:
+            argmax_inds = log_probs.cpu().argmax(-1).numpy()
+            argmax_inds = [
+                inds[: int(ind_len)]
+                for inds, ind_len in zip(argmax_inds, log_probs_length.numpy())
+            ]
+            argmax_texts_raw = [
+                self.text_encoder.decode(inds) for inds in argmax_inds[:examples_to_log]
+            ]
+            argmax_texts = [
+                self.text_encoder.ctc_decode(inds)
+                for inds in argmax_inds[:examples_to_log]
+            ]
+
+            rows["Argmax_predicitons_raw"] = argmax_texts_raw
+            rows["Argmax_predicitons"] = argmax_texts
+
+            metrics = np.array(
+                [
+                    np.array(
+                        [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
+                    )
+                    for target, pred in zip(rows["Target"].values, argmax_texts)
+                ]
+            )
+            rows["BS_CER"] = metrics[:, 0]
+            rows["BS_WER"] = metrics[:, 1]
+
+        df = pd.DataFrame.from_dict(rows)
+        df.index = [Path(path).name for path in audio_path]
+
+        self.writer.add_table("predictions", df)
