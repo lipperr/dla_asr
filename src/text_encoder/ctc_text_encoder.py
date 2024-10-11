@@ -120,8 +120,9 @@ class CTCTextEncoder:
                         )
                 dp = dp0.copy()
 
-            dp = dict(sorted(list(dp.items()), key=lambda x: -x[1])[:beam_size])
+                dp = dict(sorted(list(dp.items()), key=lambda x: -x[1])[:beam_size])
             sorted_dp_list = sorted(dp.items(), key=lambda x: -x[1])
+
             dp = [
                 {"hypothesis": prefix, "probability": prob.item()}
                 for (prefix, _), prob in sorted_dp_list

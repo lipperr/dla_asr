@@ -58,11 +58,8 @@ class Trainer(BaseTrainer):
         for loss_name in self.config.writer.loss_names:
             metrics.update(loss_name, batch[loss_name].item())
 
-        print(self.is_train, "self.is_train")
-        print(metric_funcs)
         for met in metric_funcs:
             metrics.update(met.name, met(**batch))
-            print("updated metrics")
         return batch
 
     def _log_batch(self, batch_idx, batch, mode="train"):
@@ -123,7 +120,7 @@ class Trainer(BaseTrainer):
                     np.array(
                         [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
                     )
-                    for target, pred in zip(rows["Target"].values, bs_lm_preds)
+                    for target, pred in zip(rows["Target"], bs_lm_preds)
                 ]
             )
 
@@ -142,7 +139,7 @@ class Trainer(BaseTrainer):
                     np.array(
                         [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
                     )
-                    for target, pred in zip(rows["Target"].values, bs_nolm_preds)
+                    for target, pred in zip(rows["Target"], bs_nolm_preds)
                 ]
             )
             rows["BS_CER"] = metrics[:, 0]
@@ -153,14 +150,14 @@ class Trainer(BaseTrainer):
                 self.text_encoder.ctc_beamsearch(prob, type="bs")[0]["hypothesis"]
                 for prob in probs_cut[:examples_to_log]
             ]
-            rows["BS_custom_predictions"](bs_preds)
+            rows["BS_custom_predictions"] = bs_preds
 
             metrics = np.array(
                 [
                     np.array(
                         [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
                     )
-                    for target, pred in zip(rows["Target"].values, bs_preds)
+                    for target, pred in zip(rows["Target"], bs_preds)
                 ]
             )
             rows["BS_CER"] = metrics[:, 0]
@@ -188,11 +185,11 @@ class Trainer(BaseTrainer):
                     np.array(
                         [calc_cer(target, pred) * 100, calc_wer(target, pred) * 100]
                     )
-                    for target, pred in zip(rows["Target"].values, argmax_texts)
+                    for target, pred in zip(rows["Target"], argmax_texts)
                 ]
             )
-            rows["BS_CER"] = metrics[:, 0]
-            rows["BS_WER"] = metrics[:, 1]
+            rows["Argmax_CER"] = metrics[:, 0]
+            rows["Argmax_WER"] = metrics[:, 1]
 
         df = pd.DataFrame.from_dict(rows)
         df.index = [Path(path).name for path in audio_path]
