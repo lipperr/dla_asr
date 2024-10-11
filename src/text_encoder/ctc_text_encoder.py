@@ -6,23 +6,28 @@ import kenlm
 import torch
 from pyctcdecode import Alphabet, BeamSearchDecoderCTC, LanguageModel
 
+from ..utils.load_utils import download_vocab
+
 
 class CTCTextEncoder:
     EMPTY_TOK = ""
 
-    def __init__(self, vocab_path=None, lm_path=None, use_bpe=False, **kwargs):
+    def __init__(self, vocab_type=None, lm_path=None, use_bpe=False, **kwargs):
         """
         Args:
             alphabet (list): alphabet for language. If None, it will be
                 set to ascii
         """
 
-        if vocab_path is None:
+        if vocab_type is None:
             alphabet = list(ascii_lowercase + " ")
         else:
+            vocab_path = download_vocab(vocab_type)
             assert os.path.exists(vocab_path), "Vocab path does not exist."
             with open(vocab_path) as f:
                 alphabet = [t.lower() for t in f.read().strip().split("\n")]
+            if " " not in alphabet:
+                alphabet.append(" ")
 
         self.alphabet = alphabet
         self.vocab = [self.EMPTY_TOK] + list(self.alphabet)
