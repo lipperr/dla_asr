@@ -1,7 +1,7 @@
 defaults:
   - model: deepspeech2
   - writer: wandb
-  - metrics: bs_lm_metrics
+  - metrics: bs_nolm_metrics
   - datasets: onebatchtest
   - dataloader: example
   - transforms: example_only_instance
