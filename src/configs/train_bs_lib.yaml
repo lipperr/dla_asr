@@ -20,7 +20,7 @@ loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
-  vocab_path: "data/libri_lm/librispeech-vocab.txt"
+  vocab_type: "libri"
   lm_path: None
   use_bpe: False
 trainer:
