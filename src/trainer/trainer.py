@@ -192,6 +192,6 @@ class Trainer(BaseTrainer):
             rows["Argmax_WER"] = metrics[:, 1]
 
         df = pd.DataFrame.from_dict(rows)
-        df.index = [Path(path).name for path in audio_path]
+        df.index = [Path(path).name for path in audio_path[:examples_to_log]]
 
         self.writer.add_table("predictions", df)
