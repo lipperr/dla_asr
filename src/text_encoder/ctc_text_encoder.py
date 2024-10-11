@@ -93,6 +93,7 @@ class CTCTextEncoder:
     def ctc_beamsearch(
         self, probs: torch.Tensor, type="lm", beam_size=10
     ) -> list[dict[str, float]]:
+        probs = probs.detach().cpu().numpy()
         if type == "lm":
             return [
                 {
