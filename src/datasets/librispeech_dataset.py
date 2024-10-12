@@ -22,7 +22,7 @@ URL_LINKS = {
 
 
 class LibrispeechDataset(BaseDataset):
-    def __init__(self, part, data_dir=None, *args, **kwargs):
+    def __init__(self, part, data_dir=None, data_dir_write=None, *args, **kwargs):
         assert part in URL_LINKS or part == "train_all"
 
         if data_dir is None:
@@ -30,6 +30,11 @@ class LibrispeechDataset(BaseDataset):
             data_dir.mkdir(exist_ok=True, parents=True)
 
         self._data_dir = Path(data_dir)
+
+        if data_dir_write is None:
+            self._data_dir_write = self._data_dir
+        else:
+            self._data_dir_write = Path(data_dir_write)
 
         if part == "train_all":
             index = sum(
@@ -75,7 +80,7 @@ class LibrispeechDataset(BaseDataset):
         flac_dirs = set()
         for dirpath, dirnames, filenames in os.walk(str(split_dir)):
             if any([f.endswith(".flac") for f in filenames]):
-                flac_dirs.add(dirpath)
+                flac_dirs.add(self._data_dir_write + dirpath[len(self._data_dir) :])
         for flac_dir in tqdm(
             list(flac_dirs), desc=f"Preparing librispeech folders: {part}"
         ):
