@@ -72,6 +72,9 @@ class LibrispeechDataset(BaseDataset):
             index_path = self._data_dir_write / f"{part}_index.json"
             index = self._create_index(part)
             self._data_dir_write.mkdir(exist_ok=True, parents=True)
+            print("***************")
+            print(f"Check data set index path part {part}", index_path)
+            print("***************")
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         return index
