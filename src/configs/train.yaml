@@ -1,7 +1,7 @@
 defaults:
   - model: deepspeech2
   - writer: wandb
-  - metrics: bs_nolm_metrics
+  - metrics: bs_lm_metrics
   - datasets: example
   - dataloader: trainclean100
   - transforms: example_only_instance
@@ -20,11 +20,11 @@ loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
-  vocab_type: ""
-  use_bpe: False
+  vocab_type: "libri"
+  use_lm: True
 trainer:
-  log_step: 25
-  n_epochs: 50
+  log_step: 50
+  n_epochs: 100
   epoch_len: 200
   max_grad_norm: 10
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)

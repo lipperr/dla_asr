@@ -7,13 +7,13 @@ import numpy as np
 import torch
 from pyctcdecode import Alphabet, BeamSearchDecoderCTC, LanguageModel
 
-from ..utils.load_utils import download_vocab
+from ..utils.load_utils import download_lm, download_vocab
 
 
 class CTCTextEncoder:
     EMPTY_TOK = ""
 
-    def __init__(self, vocab_type=None, lm_path=None, use_bpe=False, **kwargs):
+    def __init__(self, vocab_type=None, use_lm=False, use_bpe=False, **kwargs):
         """
         Args:
             alphabet (list): alphabet for language. If None, it will be
@@ -36,7 +36,8 @@ class CTCTextEncoder:
         self.ind2char = dict(enumerate(self.vocab))
         self.char2ind = {v: k for k, v in self.ind2char.items()}
 
-        if lm_path:
+        if use_lm:
+            lm_path = download_lm()
             assert os.path.exists(lm_path), "LM path does not exist."
             kenlm_model = kenlm.Model(lm_path)
             lm = LanguageModel(kenlm_model, alphabet)
