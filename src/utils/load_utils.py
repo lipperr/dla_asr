@@ -24,7 +24,7 @@ def download_vocab(vocab_type):
 
 
 def download_lm():
-    data_dir = ROOT_PATH / "data" / "libri_lm"
+    data_dir = ROOT_PATH / "data/libri_lm"
     gz_path = str(data_dir) + "/uppercase_3e-7.arpa.gz"
     path = str(data_dir) + "/uppercase_3e-7.arpa"
     right_path = str(data_dir) + "/lowercase_3e-7.arpa"
