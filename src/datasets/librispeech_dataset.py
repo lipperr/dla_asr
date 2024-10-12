@@ -94,8 +94,9 @@ class LibrispeechDataset(BaseDataset):
                     t_info = torchaudio.info(str(flac_path))
                     length = t_info.num_frames / t_info.sample_rate
 
-                    flac_path = (
-                        self._data_dir_write / flac_path[len(str(self._data_dir)) :]
+                    flac_path = Path(
+                        self._data_dir_write
+                        / str(flac_path)[len(str(self._data_dir)) :]
                     )
                     index.append(
                         {
