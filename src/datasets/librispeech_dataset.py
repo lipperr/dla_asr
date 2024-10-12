@@ -45,6 +45,8 @@ class LibrispeechDataset(BaseDataset):
             )
         else:
             index = self._get_or_load_index(part)
+
+        print("self._data_dir_write", self._data_dir_write)
         print("**********************")
         print("Check for path to an instance: ", index[0]["path"])
         print("**********************")
