@@ -100,8 +100,8 @@ class LibrispeechDataset(BaseDataset):
                     length = t_info.num_frames / t_info.sample_rate
 
                     flac_path = Path(
-                        self._data_dir_write
-                        / str(flac_path)[len(str(self._data_dir)) :]
+                        str(self._data_dir_write)
+                        + str(flac_path)[len(str(self._data_dir)) :]
                     )
                     index.append(
                         {
