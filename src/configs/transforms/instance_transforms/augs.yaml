@@ -1,0 +1,38 @@
+  train:
+    get_spectrogram:
+        _target_: torchvision.transforms.Compose
+        transforms:
+          - _target_: torchaudio.transforms.MelSpectrogram
+            sample_rate: 16000
+          - _target_: src.transforms.RandomApply
+            p: 0.8
+            augmentation:
+              _target_: torchvision.transforms.Compose
+              transforms:
+                - _target_:  torchaudio.transforms.FrequencyMasking
+                  freq_mask_param: 50
+                - _target_:  torchaudio.transforms.TimeMasking
+                  time_mask_param: 50
+
+  audio: # name of the tensor on which we apply transform
+    _target_: src.transforms.RandomApply
+    p: 0.8
+    augmentation:
+      _target_: torchvision.transforms.v2.Compose
+      transforms:
+        - _target_: src.transforms.wav_augs.Gain
+          p: 0.5
+        - _target_: src.transforms.wav_augs.AddColoredNoise
+          p: 0.5
+          sample_rate: ${datasets.train.target_sr}
+        - _target_: src.transforms.wav_augs.SpeedPerturb
+          orig_freq: ${datasets.train.target_sr}
+          factors: [[0.9, 1.1, 1.0, 1.0, 1.0]]
+        - _target_: src.transforms.wav_augs.PitchShift
+          sample_rate: ${datasets.train.target_sr}
+          n_steps: 4
+
+  inference:
+    get_spectrogram:
+      _target_: torchaudio.transforms.MelSpectrogram
+      sample_rate: 16000
