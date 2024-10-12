@@ -2,16 +2,16 @@ defaults:
   - model: deepspeech2
   - writer: wandb
   - metrics: bs_nolm_metrics
-  - datasets: onebatchtest
-  - dataloader: example
+  - datasets: example
+  - dataloader: trainclean100
   - transforms: spec_and_wav_augs
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 3e-4
+  lr: 2e-4
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.OneCycleLR
-  max_lr: 1e-3
+  max_lr: 4e-4
   pct_start: 0.1
   steps_per_epoch: ${trainer.epoch_len}
   epochs: ${trainer.n_epochs}
@@ -22,9 +22,10 @@ text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
   vocab_type: ''
 trainer:
-  log_step: 5
-  n_epochs: 5
-  epoch_len: 20
+  log_step: 10
+  n_epochs: 10
+  epoch_len: 50
+  max_grad_norm: 10
   device_tensors: ["spectrogram", "text_encoded"] # which tensors should be on device (ex. GPU)
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
