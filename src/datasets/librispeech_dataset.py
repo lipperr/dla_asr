@@ -30,10 +30,8 @@ class LibrispeechDataset(BaseDataset):
             data_dir.mkdir(exist_ok=True, parents=True)
 
         self._data_dir = Path(data_dir)
-
-        if data_dir_write is None:
-            self._data_dir_write = self._data_dir
-        else:
+        self._data_dir_write = self._data_dir
+        if data_dir_write:
             self._data_dir_write = Path(data_dir_write)
 
         if part == "train_all":
@@ -47,6 +45,9 @@ class LibrispeechDataset(BaseDataset):
             )
         else:
             index = self._get_or_load_index(part)
+        print("**********************")
+        print("Check for path to an instance: ", index[0]["path"])
+        print("**********************")
 
         super().__init__(index, *args, **kwargs)
 
