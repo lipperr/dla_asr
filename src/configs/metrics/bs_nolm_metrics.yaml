@@ -7,8 +7,8 @@ inference: # metrics that are calculated during inference (eval)
   - _target_: src.metrics.BeamSearchCERMetric
     name: "CER_(BeamSearch)"
     type: "nolm"
-    beam_size: 10
+    beam_size: 5
   - _target_: src.metrics.BeamSearchWERMetric
     name: "WER_(BeamSearch)"
     type: "nolm"
-    beam_size: 10
+    beam_size: 5

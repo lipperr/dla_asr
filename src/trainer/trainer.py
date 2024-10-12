@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import torch
 
 from src.logger.utils import plot_spectrogram
 from src.metrics.tracker import MetricTracker
@@ -33,6 +34,7 @@ class Trainer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform),
                 model outputs, and losses.
         """
+        torch.cuda.empty_cache()
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
 
