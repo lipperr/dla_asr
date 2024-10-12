@@ -2,7 +2,7 @@ defaults:
   - model: deepspeech2
   - writer: wandb
   - metrics: bs_lm_metrics
-  - datasets: example
+  - datasets: main_train
   - dataloader: trainclean100
   - transforms: example_only_instance
   - _self_
