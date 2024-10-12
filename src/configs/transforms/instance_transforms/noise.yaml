@@ -4,10 +4,10 @@ train:
     sample_rate: 16000
   audio: # name of the tensor on which we apply transform
     _target_: src.transforms.RandomApply
-    p: 0.8
+    p: 0.6
     augmentation:
       _target_: src.transforms.wav_augs.AddColoredNoise
-      p: 0.8
+      p: 0.6
       sample_rate: ${datasets.train.target_sr}
 inference:
   get_spectrogram:
