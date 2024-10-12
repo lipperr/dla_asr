@@ -80,9 +80,7 @@ class LibrispeechDataset(BaseDataset):
         flac_dirs = set()
         for dirpath, dirnames, filenames in os.walk(str(split_dir)):
             if any([f.endswith(".flac") for f in filenames]):
-                flac_dirs.add(
-                    str(self._data_dir_write) + dirpath[len(str(self._data_dir)) :]
-                )
+                flac_dirs.add(dirpath)
         for flac_dir in tqdm(
             list(flac_dirs), desc=f"Preparing librispeech folders: {part}"
         ):
@@ -92,6 +90,9 @@ class LibrispeechDataset(BaseDataset):
                 for line in f:
                     f_id = line.split()[0]
                     f_text = " ".join(line.split()[1:]).strip()
+                    flac_dir = (
+                        self._data_dir_write / dirpath[len(str(self._data_dir)) :]
+                    )
                     flac_path = flac_dir / f"{f_id}.flac"
                     t_info = torchaudio.info(str(flac_path))
                     length = t_info.num_frames / t_info.sample_rate
