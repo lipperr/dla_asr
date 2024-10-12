@@ -28,7 +28,9 @@ class LibrispeechDataset(BaseDataset):
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "librispeech"
             data_dir.mkdir(exist_ok=True, parents=True)
-        self._data_dir = data_dir
+
+        self._data_dir = Path(data_dir)
+
         if part == "train_all":
             index = sum(
                 [
