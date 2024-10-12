@@ -3,6 +3,7 @@ import re
 from string import ascii_lowercase
 
 import kenlm
+import numpy as np
 import torch
 from pyctcdecode import Alphabet, BeamSearchDecoderCTC, LanguageModel
 
@@ -93,8 +94,7 @@ class CTCTextEncoder:
     def ctc_beamsearch(
         self, probs: torch.Tensor, type="lm", beam_size=10
     ) -> list[dict[str, float]]:
-        if isinstance(probs, torch.Tensor):
-            probs = probs.detach().cpu().numpy()
+        probs = np.exp(probs)
         if type == "lm":
             return [
                 {
