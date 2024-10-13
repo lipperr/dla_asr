@@ -38,9 +38,12 @@ class CTCTextEncoder:
 
         if use_lm:
             lm_path = download_lm()
+            vocab_path = download_vocab("libri")
+            with open(vocab_path) as f:
+                unigrams = [t.lower() for t in f.read().strip().split("\n")]
             assert os.path.exists(lm_path), "LM path does not exist."
             kenlm_model = kenlm.Model(lm_path)
-            lm = LanguageModel(kenlm_model, alphabet)
+            lm = LanguageModel(kenlm_model, unigrams=unigrams)
             self.decoder_lm = BeamSearchDecoderCTC(Alphabet(self.vocab, False), lm)
 
         self.decoder = BeamSearchDecoderCTC(Alphabet(self.vocab, False), None)

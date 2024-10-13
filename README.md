@@ -10,7 +10,7 @@
 
 ## About
 
-This repository contains a template for solving ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework. Some parts of the code are missing (or do not follow the most optimal design choices...) and students are required to fill these parts themselves (as well as writing their own models, etc.).
+This repository contains an example solution for ASR task with PyTorch. This template branch is a part of the [HSE DLA course](https://github.com/markovka17/dla) ASR homework.
 
 See the task assignment [here](https://github.com/markovka17/dla/tree/2024/hw1_asr).
 
@@ -70,9 +70,43 @@ To run inference (evaluate the model or save predictions):
 python3 inference.py HYDRA_CONFIG_ARGUMENTS
 ```
 
-## Credits
+## How to reproduce the best model
+Run the following command:
+```bash
+python3 train.py -cn=train_argmax
+```
+The logs from training the model with config train_argmax.yaml are [here](https://drive.google.com/file/d/14ZhkszU6IMt0f0okZ6SvNknMYzlLHKcO/view?usp=sharing)
 
-This repository is based on a [PyTorch Project Template](https://github.com/Blinorot/pytorch_project_template).
+## Additional features
+
+-  BeamSearch CTC decoder and a pretrained LM model
+-  Custom vocabulary
+-  Resume training from a pretrained model state
+
+## Auxillary functions
+
+- *wer_cer_compute.py* calculates and prints metrics given the path to ground truth and predicted transcriptions
+- *download_model.py* downloads the best model to a path given as an argument
+
+## How to run inference on the final model
+
+Run the command
+```bash
+python3 inference.py -cn=inference
+```
+**inference.yaml** containes a parameter *from_pretrained*. If *from_pretrained* is not None, it's the path to a model on which the inference would run. By default, *from_pretrained* is the path to the best model.
+
+Parameter *metrics* containes a config with metrics on which to run inference. Default is *bs_lm_metrics* (pretrained LM with BeamSearch).
+
+## WER and CER of the final model
+
+test-clean CER_(Argmax): **0.07**
+test-clean WER_(Argmax): **0.23**
+
+LM with BeamSearch significantly improves metrics:
+
+test-clean CER_(LM-BeamSearch): **0.06**
+test-clean WER_(LM-BeamSearch): **0.16**
 
 ## License
 
