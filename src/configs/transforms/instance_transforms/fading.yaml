@@ -4,11 +4,11 @@ train:
     sample_rate: 16000
   audio: # name of the tensor on which we apply transform
     _target_: src.transforms.RandomApply
-    p: 0.8
+    p: 1
     augmentation:
       _target_: src.transforms.wav_augs.Fading
-      fade_in_len: 10
-      fade_out_len: 10
+      fade_in_len: 5
+      fade_out_len: 5
 inference:
   get_spectrogram:
     _target_: torchaudio.transforms.MelSpectrogram
