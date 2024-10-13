@@ -4,7 +4,7 @@ defaults:
   - metrics: example
   - datasets: onebatchtest
   - dataloader: example
-  - transforms: spec_and_wav_augs.yaml
+  - transforms: spec_and_wav_augs
   - _self_
 optimizer:
   _target_: torch.optim.AdamW
