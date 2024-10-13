@@ -1,5 +1,6 @@
 import gzip
 import os
+import pathlib
 import shutil
 
 import gdown
@@ -60,6 +61,9 @@ def download_best_model(path=None):
         data_dir = ROOT_PATH / "data" / "models"
         data_dir.mkdir(exist_ok=True, parents=True)
         path = str(data_dir) + "best_model.pth"
+    else:
+        dir = path[: -path[::-1].find("/")]
+        pathlib.Path(dir).mkdir(exist_ok=True, parents=True)
 
     print("Downloading best model...")
     gdown.download(id=URL_LINKS["best_model"], output=path)
