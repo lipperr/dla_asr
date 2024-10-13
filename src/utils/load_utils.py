@@ -24,8 +24,7 @@ def download_vocab(vocab_type):
     if vocab_type == "libri":
         wget.download(URL_LINKS[vocab_type], path)
     else:
-        gdown.download(id=URL_LINKS[vocab_type])
-        os.rename(f"asr/{vocab_type}_tokens.txt", path)
+        gdown.download(id=URL_LINKS[vocab_type], output=path)
     print("\nVocab downloaded!")
     return path
 
