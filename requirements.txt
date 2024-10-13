@@ -15,6 +15,7 @@ editdistance
 kenlm
 pyctcdecode
 torch_audiomentations
+gdown
 
 black
 isort
