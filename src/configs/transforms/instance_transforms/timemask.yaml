@@ -2,7 +2,7 @@ train:
   get_spectrogram: # special key for getting spectrogram
     _target_: torchaudio.transforms.MelSpectrogram
     sample_rate: 16000
-  audio: # name of the tensor on which we apply transform
+  spectrogram: # name of the tensor on which we apply transform
     _target_: src.transforms.RandomApply
     p: 0.8
     augmentation:
