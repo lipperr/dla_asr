@@ -1,8 +1,8 @@
 defaults:
   - model: deepspeech2
   - writer: wandb
-  - metrics: bs_lm_metrics
-  - datasets: main_train
+  - metrics: bs_nolm_metrics
+  - datasets: example
   - dataloader: trainclean100
   - transforms: example_only_instance
   - _self_
@@ -20,8 +20,8 @@ loss_function:
   _target_: src.loss.CTCLossWrapper
 text_encoder:
   _target_: src.text_encoder.CTCTextEncoder
-  vocab_type: "libri"
-  use_lm: True
+  vocab_type: "bpe"
+  use_lm: False
 trainer:
   log_step: 50
   n_epochs: 100
@@ -31,7 +31,7 @@ trainer:
   resume_from: null # null or path to the checkpoint dir with *.pth and config.yaml
   device: auto # device name or "auto"
   override: True # if True, will override the previous run with the same name
-  monitor: "min val_WER_(LM-BeamSearch)" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
+  monitor: "min val_WER_(BeamSearch)" # "off" or "max/min metric_name", i.e. our goal is to maximize/minimize metric
   save_period: 5 # checkpoint each save_period epochs in addition to the best epoch
   early_stop: ${trainer.n_epochs} # epochs for early stopping
   save_dir: "training"
