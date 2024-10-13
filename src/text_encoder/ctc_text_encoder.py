@@ -13,7 +13,7 @@ from ..utils.load_utils import download_lm, download_vocab
 class CTCTextEncoder:
     EMPTY_TOK = ""
 
-    def __init__(self, vocab_type=None, use_lm=False, use_bpe=False, **kwargs):
+    def __init__(self, vocab_type=None, use_lm=False, **kwargs):
         """
         Args:
             alphabet (list): alphabet for language. If None, it will be
@@ -22,6 +22,64 @@ class CTCTextEncoder:
 
         if vocab_type is None or vocab_type == "":
             alphabet = list(ascii_lowercase + " ")
+        elif vocab_type == "bpe":
+            self.alphabet = [
+                "l",
+                "u",
+                " x",
+                " o",
+                "z",
+                " m",
+                "'",
+                " f",
+                " ",
+                "w",
+                " j",
+                "i",
+                " b",
+                "q",
+                "g",
+                "t",
+                " r",
+                "k",
+                "x",
+                "o",
+                " e",
+                "m",
+                "j",
+                "v",
+                "y",
+                "e",
+                "b",
+                " k",
+                " q",
+                " g",
+                " i",
+                " l",
+                " a",
+                " y",
+                " h",
+                "f",
+                " p",
+                "'",
+                "d",
+                "a",
+                "c",
+                "r",
+                " c",
+                " u",
+                " v",
+                " w",
+                "n",
+                "h",
+                "p",
+                " d",
+                "s",
+                " s",
+                " t",
+                " z",
+                " n",
+            ]
         else:
             vocab_path = download_vocab(vocab_type)
             assert os.path.exists(vocab_path), "Vocab path does not exist."
