@@ -58,9 +58,9 @@ def main(config):
         device=device,
         dataloaders=dataloaders,
         text_encoder=text_encoder,
-        batch_transforms=batch_transforms,
         save_path=save_path,
         metrics=metrics,
+        batch_transforms=batch_transforms,
         skip_model_load=False,
     )
 

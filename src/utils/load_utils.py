@@ -12,6 +12,7 @@ URL_LINKS = {
     "bpe": "1N78m0gLPBOTA4Nt5iG4LGoED44-fqPGM",
     "libri": "https://openslr.elda.org/resources/11/librispeech-vocab.txt",
     "lm": "https://www.openslr.org/resources/11/3-gram.pruned.3e-7.arpa.gz",
+    "best_model": "1wA8Lx-hdYsVGRzSexxP892gBbd-8SXy9",
 }
 
 
@@ -52,3 +53,15 @@ def download_lm():
 
     print("\nLanguage model downloaded!")
     return right_path
+
+
+def download_best_model(path=None):
+    if path is None:
+        data_dir = ROOT_PATH / "data" / "models"
+        data_dir.mkdir(exist_ok=True, parents=True)
+        path = str(data_dir) + "best_model.pth"
+
+    print("Downloading best model...")
+    gdown.download(id=URL_LINKS["best_model"], output=path)
+    print("\nBest model downloaded!")
+    return path

@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import torch
 from tqdm.auto import tqdm
 
@@ -120,9 +123,6 @@ class Inferencer(BaseTrainer):
                 the dataloader (possibly transformed via batch transform)
                 and model outputs.
         """
-        # TODO change inference logic so it suits ASR assignment
-        # and task pipeline
-
         batch = self.move_batch_to_device(batch)
         batch = self.transform_batch(batch)  # transform batch on device -- faster
 
@@ -133,29 +133,35 @@ class Inferencer(BaseTrainer):
             for met in self.metrics["inference"]:
                 metrics.update(met.name, met(**batch))
 
-        # Some saving logic. This is an example
-        # Use if you need to save predictions on disk
-
-        batch_size = batch["logits"].shape[0]
-        current_id = batch_idx * batch_size
+        batch_size = batch["log_probs"].shape[0]
+        # current_id = batch_idx * batch_size
 
         for i in range(batch_size):
             # clone because of
             # https://github.com/pytorch/pytorch/issues/1995
-            logits = batch["logits"][i].clone()
-            label = batch["labels"][i].clone()
-            pred_label = logits.argmax(dim=-1)
+            log_probs = batch["log_probs"][i].clone()
+            log_probs_length = batch["log_probs_length"][i].clone()
+            target_text = batch["text"][i]
+            audio_path = batch["audio_path"][i]
 
-            output_id = current_id + i
+            pred_inds = torch.argmax(log_probs.cpu(), dim=-1).numpy()
+            length = log_probs_length.detach().numpy()
+            target_text = self.text_encoder.normalize_text(target_text)
+            prediction = self.text_encoder.ctc_decode(pred_inds[:length])
+
+            # output_id = current_id + i
 
             output = {
-                "pred_label": pred_label,
-                "label": label,
+                "prediction": prediction,
+                "target": target_text,
             }
 
             if self.save_path is not None:
                 # you can use safetensors or other lib here
-                torch.save(output, self.save_path / part / f"output_{output_id}.pth")
+                # torch.save(output, self.save_path / part / f"{str(Path(audio_path).stem)}_output.pth")
+                path = self.save_path / f"{str(Path(audio_path).stem)}.json"
+                with open(path, "w") as f:
+                    json.dump(output, f)
 
         return batch
 
@@ -177,7 +183,7 @@ class Inferencer(BaseTrainer):
 
         # create Save dir
         if self.save_path is not None:
-            (self.save_path / part).mkdir(exist_ok=True, parents=True)
+            (self.save_path).mkdir(exist_ok=True, parents=True)
 
         with torch.no_grad():
             for batch_idx, batch in tqdm(

@@ -15,6 +15,8 @@ class CustomDirAudioDataset(BaseDataset):
                     if transc_path.exists():
                         with transc_path.open() as f:
                             entry["text"] = f.read().strip()
+                else:
+                    entry["text"] = "-"
             if len(entry) > 0:
                 data.append(entry)
         super().__init__(data, *args, **kwargs)

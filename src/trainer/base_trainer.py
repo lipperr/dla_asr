@@ -1,3 +1,4 @@
+import os
 from abc import abstractmethod
 
 import torch
@@ -8,6 +9,7 @@ from tqdm.auto import tqdm
 from src.datasets.data_utils import inf_loop
 from src.metrics.tracker import MetricTracker
 from src.utils.io_utils import ROOT_PATH
+from src.utils.load_utils import download_best_model
 
 
 class BaseTrainer:
@@ -548,6 +550,9 @@ class BaseTrainer:
             self.logger.info(f"Loading model weights from: {pretrained_path} ...")
         else:
             print(f"Loading model weights from: {pretrained_path} ...")
+
+        if not os.path.exists(pretrained_path):
+            download_best_model(pretrained_path)
         checkpoint = torch.load(pretrained_path, self.device)
 
         if checkpoint.get("state_dict") is not None:
