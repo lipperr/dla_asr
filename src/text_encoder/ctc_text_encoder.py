@@ -23,7 +23,7 @@ class CTCTextEncoder:
         if vocab_type is None or vocab_type == "":
             alphabet = list(ascii_lowercase + " ")
         elif vocab_type == "bpe":
-            self.alphabet = [
+            alphabet = [
                 "l",
                 "u",
                 " x",
