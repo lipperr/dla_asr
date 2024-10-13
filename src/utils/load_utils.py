@@ -2,12 +2,14 @@ import gzip
 import os
 import shutil
 
+import gdown
 import wget
 
 from src.utils.io_utils import ROOT_PATH
 
 URL_LINKS = {
-    "bpe": "",
+    "simple_bpe": "1v2AkDhWQssJe3ndeIl4VqttZ67-vNyzt",
+    "bpe": "1N78m0gLPBOTA4Nt5iG4LGoED44-fqPGM",
     "libri": "https://openslr.elda.org/resources/11/librispeech-vocab.txt",
     "lm": "https://www.openslr.org/resources/11/3-gram.pruned.3e-7.arpa.gz",
 }
@@ -17,8 +19,13 @@ def download_vocab(vocab_type):
     data_dir = ROOT_PATH / "data" / "libri_lm"
     data_dir.mkdir(exist_ok=True, parents=True)
     path = str(data_dir) + f"/{vocab_type}_vocab.txt"
+
     print("Downloading vocab...")
-    wget.download(URL_LINKS[vocab_type], path)
+    if vocab_type == "libri":
+        wget.download(URL_LINKS[vocab_type], path)
+    else:
+        gdown.download(id=URL_LINKS[vocab_type])
+        os.rename(f"asr/{vocab_type}_tokens.txt", path)
     print("\nVocab downloaded!")
     return path
 

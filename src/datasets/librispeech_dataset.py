@@ -45,12 +45,6 @@ class LibrispeechDataset(BaseDataset):
             )
         else:
             index = self._get_or_load_index(part)
-
-        print("self._data_dir_write", self._data_dir_write)
-        print("**********************")
-        print("Check for path to an instance: ", index[0]["path"])
-        print("**********************")
-
         super().__init__(index, *args, **kwargs)
 
     def _load_part(self, part):
@@ -72,9 +66,6 @@ class LibrispeechDataset(BaseDataset):
             index_path = self._data_dir_write / f"{part}_index.json"
             index = self._create_index(part)
             self._data_dir_write.mkdir(exist_ok=True, parents=True)
-            print("***************")
-            print(f"Check data set index path part {part}", index_path)
-            print("***************")
             with index_path.open("w") as f:
                 json.dump(index, f, indent=2)
         return index
@@ -101,11 +92,6 @@ class LibrispeechDataset(BaseDataset):
                     flac_path = flac_dir / f"{f_id}.flac"
                     t_info = torchaudio.info(str(flac_path))
                     length = t_info.num_frames / t_info.sample_rate
-
-                    # flac_path = Path(
-                    #     str(self._data_dir_write)
-                    #     + str(flac_path)[len(str(self._data_dir)) :]
-                    # )
                     index.append(
                         {
                             "path": str(flac_path.absolute().resolve()),
