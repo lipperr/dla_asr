@@ -1,5 +1,5 @@
 defaults:
-  - instance_transforms: pass_filters
+  - instance_transforms: timemask
   - _self_
 
 # these lines are required if you do not use batch transforms
