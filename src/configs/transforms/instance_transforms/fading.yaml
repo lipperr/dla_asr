@@ -7,7 +7,7 @@ train:
     p: 1
     augmentation:
       _target_: src.transforms.wav_augs.Fading
-      alpha: 0.5
+      alpha: 0.4
 inference:
   get_spectrogram:
     _target_: torchaudio.transforms.MelSpectrogram

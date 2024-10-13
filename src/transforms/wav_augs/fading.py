@@ -8,7 +8,7 @@ class Fading(nn.Module):
         self.alpha = alpha
 
     def __call__(self, data: Tensor):
-        fade_len = data.shape[-1] * self.alpha // 1
+        fade_len = int(data.shape[-1] * self.alpha)
         self._aug = torchaudio.transforms.Fade(fade_len, fade_len)
         x = data.unsqueeze(1)
         return self._aug(x).squeeze(1)
