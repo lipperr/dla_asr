@@ -98,6 +98,12 @@ python3 inference.py -cn=inference
 
 Parameter *metrics* containes a config with metrics on which to run inference. Default is *bs_lm_metrics* (pretrained LM with BeamSearch).
 
+If you want to run inference on a **custom dataset**, specify batch_size N and paths to audio and/or transcriptions as follows:
+
+```bash
+python3 inference.py -cn=inference datasets="custom" datasets.test.audio_dir="your path" datasets.test.transcription_dir="your path"  dataloader.batch_size=N
+```
+
 ## WER and CER of the final model
 
 test-clean CER_(Argmax): **0.07**
